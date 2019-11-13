@@ -86,7 +86,7 @@ ICM20948_mag::measure()
 
 	/* Check if data ready is set.
 	 * This is not described to be set in continuous mode according to the
-	 * MPU9250 datasheet. However, the datasheet of the 8963 recommends to
+	 * ICM20948 datasheet. However, the datasheet of the AK09916 recommends to
 	 * check data ready before doing the read and before triggering the
 	 * next measurement by reading ST2. */
 	if (!(st1 & AK09916_ST1_DRDY)) {
@@ -119,7 +119,7 @@ ICM20948_mag::_measure(hrt_abstime timestamp_sample, ak09916_regs data)
 {
 	/* Check if data ready is set.
 	 * This is not described to be set in continuous mode according to the
-	 * MPU9250 datasheet. However, the datasheet of the 8963 recommends to
+	 * ICM20948 datasheet. However, the datasheet of the AK09916 recommends to
 	 * check data ready before doing the read and before triggering the
 	 * next measurement by reading ST2.
 	 *
@@ -218,7 +218,7 @@ ICM20948_mag::write_reg(unsigned reg, uint8_t value)
 		passthrough_write(reg, value);
 
 	} else {
-		_interface->write(ICM20948_LOW_SPEED_OP(reg), &value, 1);
+		_interface->write(reg, &value, 1);
 	}
 }
 
@@ -294,7 +294,7 @@ ICM20948_mag::ak09916_setup_master_i2c()
 int
 ICM20948_mag::ak09916_setup(void)
 {
-	int retries = 10;
+	int retries = 20;
 
 	do {
 
@@ -310,7 +310,7 @@ ICM20948_mag::ak09916_setup(void)
 		retries--;
 		PX4_WARN("AK09916: bad id %d retries %d", id, retries);
 		_parent->modify_reg(ICMREG_20948_USER_CTRL, 0, BIT_I2C_MST_RST);
-		up_udelay(100);
+		px4_usleep(200);
 	} while (retries > 0);
 
 	if (retries == 0) {
