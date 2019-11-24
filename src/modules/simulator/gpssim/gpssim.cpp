@@ -58,7 +58,7 @@
 #include <drivers/drv_hrt.h>
 #include <drivers/device/device.h>
 #include <uORB/uORB.h>
-#include <uORB/topics/vehicle_gps_position.h>
+#include <uORB/topics/sensor_gps.h>
 #include <uORB/topics/satellite_info.h>
 
 #include <simulator/simulator.h>
@@ -108,7 +108,7 @@ private:
 	bool				_task_should_exit;				///< flag to make the main worker task exit
 	volatile int			_task;						///< worker task
 	GPS_Sat_Info			*_Sat_Info;					///< instance of GPS sat info data object
-	struct vehicle_gps_position_s	_report_gps_pos;				///< uORB topic for gps position
+	sensor_gps_s			_report_gps_pos;				///< uORB topic for gps position
 	orb_advert_t			_report_gps_pos_pub;				///< uORB pub for gps position
 	struct satellite_info_s		*_p_report_sat_info;				///< pointer to uORB topic for satellite info
 	orb_advert_t			_report_sat_info_pub;				///< uORB pub for satellite info
@@ -319,10 +319,10 @@ GPSSIM::task_main()
 
 			/* opportunistic publishing - else invalid data would end up on the bus */
 			if (_report_gps_pos_pub != nullptr) {
-				orb_publish(ORB_ID(vehicle_gps_position), _report_gps_pos_pub, &_report_gps_pos);
+				orb_publish(ORB_ID(sensor_gps), _report_gps_pos_pub, &_report_gps_pos);
 
 			} else {
-				_report_gps_pos_pub = orb_advertise(ORB_ID(vehicle_gps_position), &_report_gps_pos);
+				_report_gps_pos_pub = orb_advertise(ORB_ID(sensor_gps), &_report_gps_pos);
 			}
 
 			if (_p_report_sat_info) {

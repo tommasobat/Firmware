@@ -158,7 +158,7 @@ private:
 
 	GPS_Sat_Info			*_sat_info{nullptr};				///< instance of GPS sat info data object
 
-	vehicle_gps_position_s		_report_gps_pos{};				///< uORB topic for gps position
+	sensor_gps_s		_report_gps_pos{};				///< uORB topic for gps position
 	satellite_info_s		*_p_report_sat_info{nullptr};			///< pointer to uORB topic for satellite info
 
 	orb_advert_t			_report_gps_pos_pub{nullptr};			///< uORB pub for gps position
@@ -946,8 +946,7 @@ void
 GPS::publish()
 {
 	if (_instance == Instance::Main || _is_gps_main_advertised) {
-		orb_publish_auto(ORB_ID(vehicle_gps_position), &_report_gps_pos_pub, &_report_gps_pos, &_gps_orb_instance,
-				 ORB_PRIO_DEFAULT);
+		orb_publish_auto(ORB_ID(sensor_gps), &_report_gps_pos_pub, &_report_gps_pos, &_gps_orb_instance, ORB_PRIO_DEFAULT);
 		// Heading/yaw data can be updated at a lower rate than the other navigation data.
 		// The uORB message definition requires this data to be set to a NAN if no new valid data is available.
 		_report_gps_pos.heading = NAN;

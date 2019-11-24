@@ -92,6 +92,7 @@
 
 #include "vehicle_acceleration/VehicleAcceleration.hpp"
 #include "vehicle_angular_velocity/VehicleAngularVelocity.hpp"
+#include "vehicle_gps_position/VehicleGPSPosition.hpp"
 
 using namespace DriverFramework;
 using namespace sensors;
@@ -172,6 +173,7 @@ private:
 
 	VehicleAcceleration	_vehicle_acceleration;
 	VehicleAngularVelocity	_vehicle_angular_velocity;
+	VehicleGPSPosition	_vehicle_gps_position;
 
 
 	/**
@@ -221,12 +223,14 @@ Sensors::Sensors(bool hil_enabled) :
 
 	_vehicle_acceleration.Start();
 	_vehicle_angular_velocity.Start();
+	_vehicle_gps_position.Start();
 }
 
 Sensors::~Sensors()
 {
 	_vehicle_acceleration.Stop();
 	_vehicle_angular_velocity.Stop();
+	_vehicle_gps_position.Stop();
 }
 
 int
@@ -573,6 +577,7 @@ int Sensors::print_status()
 
 	_vehicle_acceleration.PrintStatus();
 	_vehicle_angular_velocity.PrintStatus();
+	_vehicle_gps_position.PrintStatus();
 
 	return 0;
 }
