@@ -61,6 +61,25 @@ TEST_F(TrajectoryConstraintsTest, testStraight)
 	EXPECT_FLOAT_EQ(through_speed, direct_speed);
 }
 
+TEST_F(TrajectoryConstraintsTest, testStraightNaN)
+{
+	// GIVEN: 3 waypoints in straight line
+	next_target = target + 2.f * (target - vehicle_location);
+	target = vehicle_location + 0.5f * (next_target - vehicle_location);
+	next_target(0) = NAN;
+	next_target(1) = NAN;
+
+	// WHEN: we get the speed for points which are NaN afterwards
+	Vector3f waypoints[3] = {vehicle_location, target, next_target};
+	float through_speed = computeXYSpeedFromWaypoints<3>(waypoints, config);
+
+	// THEN: it should be the same as speed to the closer point
+	Vector3f direct_points[2] = {vehicle_location, target};
+	float direct_speed = computeXYSpeedFromWaypoints<2>(direct_points, config);
+
+	EXPECT_FLOAT_EQ(through_speed, direct_speed);
+}
+
 TEST_F(TrajectoryConstraintsTest, testStraightLowJerkClose)
 {
 	// GIVEN: 3 waypoints in straight line
