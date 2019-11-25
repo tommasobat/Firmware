@@ -190,7 +190,7 @@ float FlightTaskAutoLineSmoothVel::_getMaxXYSpeed() const
 	config.xy_accept_rad = _target_acceptance_radius;
 	config.max_acc_xy = _trajectory[0].getMaxAccel();
 	config.max_jerk = _trajectory[0].getMaxJerk();
-	config.max_speed_xy = _trajectory[0].getMaxVel();
+	config.max_speed_xy = _mc_cruise_speed;
 	config.max_acc_xy_radius_scale = _param_mpc_xy_traj_p.get();
 
 	Vector3f waypoints[3] = {pos_traj, _target, _next_wp};
