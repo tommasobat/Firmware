@@ -39,6 +39,7 @@
 #include <lib/cdev/CDev.hpp>
 #include <lib/conversion/rotation.h>
 #include <mathlib/math/filter/LowPassFilter2pVector3f.hpp>
+#include <mathlib/math/filter/NotchFilter.hpp>
 #include <px4_platform_common/module_params.h>
 #include <uORB/uORB.h>
 #include <uORB/PublicationMulti.hpp>
@@ -68,11 +69,13 @@ public:
 private:
 
 	void configure_filter(float cutoff_freq) { _filter.set_cutoff_frequency(_sample_rate, cutoff_freq); }
+	void configure_notch_filter(float notch_freq, float bandwidth) { _notch_filter.setParameters(_sample_rate, notch_freq, bandwidth); }
 
 	uORB::PublicationMultiData<sensor_gyro_s>		_sensor_gyro_pub;
 	uORB::PublicationMultiData<sensor_gyro_control_s>	_sensor_gyro_control_pub;
 
 	math::LowPassFilter2pVector3f _filter{1000, 100};
+	math::NotchFilter<matrix::Vector3f> _notch_filter{};
 	Integrator _integrator{4000, true};
 
 	const enum Rotation	_rotation;
@@ -86,6 +89,8 @@ private:
 
 	DEFINE_PARAMETERS(
 		(ParamFloat<px4::params::IMU_GYRO_CUTOFF>) _param_imu_gyro_cutoff,
+		(ParamFloat<px4::params::IMU_GYRO_NOTCH_F>) _param_imu_gyro_notch_f,
+		(ParamFloat<px4::params::IMU_GYRO_NOTCH_W>) _param_imu_gyro_notch_w,
 		(ParamInt<px4::params::IMU_GYRO_RATEMAX>) _param_imu_gyro_rate_max
 	)
 

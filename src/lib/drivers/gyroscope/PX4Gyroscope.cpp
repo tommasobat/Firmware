@@ -52,6 +52,7 @@ PX4Gyroscope::PX4Gyroscope(uint32_t device_id, uint8_t priority, enum Rotation r
 	// set software low pass filter for controllers
 	updateParams();
 	configure_filter(_param_imu_gyro_cutoff.get());
+	configure_notch_filter(_param_imu_gyro_notch_f.get(), _param_imu_gyro_notch_w.get());
 }
 
 PX4Gyroscope::~PX4Gyroscope()
@@ -104,6 +105,7 @@ PX4Gyroscope::set_sample_rate(unsigned rate)
 {
 	_sample_rate = rate;
 	_filter.set_cutoff_frequency(_sample_rate, _filter.get_cutoff_freq());
+	_notch_filter.setParameters(_sample_rate, _notch_filter.getNotchFreq(), _notch_filter.getBandwidth());
 }
 
 void
@@ -120,8 +122,9 @@ PX4Gyroscope::update(hrt_abstime timestamp, float x, float y, float z)
 	// Apply range scale and the calibrating offset/scale
 	const matrix::Vector3f val_calibrated{(((raw * report.scaling) - _calibration_offset).emult(_calibration_scale))};
 
-	// Filtered values
-	const matrix::Vector3f val_filtered{_filter.apply(val_calibrated)};
+	// Filtered values: apply notch and then low-pass
+	matrix::Vector3f val_filtered{_notch_filter.apply(val_calibrated)};
+	val_filtered = _filter.apply(val_filtered);
 
 
 	// publish control data (filtered gyro) immediately
