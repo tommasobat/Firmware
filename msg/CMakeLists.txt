@@ -156,7 +156,7 @@ set(msg_files
 
 set(deprecated_msgs
 	# TODO: uncomment as soon as https://github.com/PX4/Firmware/pull/13127 is rebased over this
-	# ekf2_innovations.msg	# 2019-11-22, Updated estimator interface and logging; replaced by 'estimator_innovations'.
+	# ekf2_innovations.msg	# 2019-11-25, Updated estimator interface and logging; replaced by 'estimator_innovations'.
 	)
 
 foreach(msg IN LISTS deprecated_msgs)
