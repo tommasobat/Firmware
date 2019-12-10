@@ -40,7 +40,7 @@
  * based on the icm20948 driver
  */
 
-#include "icm20948.h"
+#include "ICM20948.hpp"
 
 /*
   we set the timer interrupt to run a bit faster than the desired
@@ -133,16 +133,6 @@ ICM20948::init()
 	}
 
 	/* Magnetometer setup */
-
-#ifdef USE_I2C
-	px4_usleep(100);
-
-	if (!_mag.is_passthrough() && _mag._interface->init() != PX4_OK) {
-		PX4_ERR("failed to setup ak09916 interface");
-	}
-
-#endif /* USE_I2C */
-
 	ret = _mag.ak09916_reset();
 
 	if (ret != OK) {
@@ -220,12 +210,6 @@ ICM20948::reset_mpu()
 
 	// INT CFG => Interrupt on Data Ready
 	write_checked_reg(ICMREG_20948_INT_ENABLE_1, BIT_RAW_RDY_EN);        // INT: Raw data ready
-
-#ifdef USE_I2C
-	bool bypass = !_mag.is_passthrough();
-#else
-	bool bypass = false;
-#endif
 
 	/* INT: Clear on any read.
 	 * If this instance is for a device is on I2C bus the Mag will have an i2c interface
@@ -717,7 +701,7 @@ ICM20948::measure()
 	const hrt_abstime timestamp_sample = hrt_absolute_time();
 
 	// Fetch the full set of measurements from the ICM20948 in one pass
-	if (_mag.is_passthrough() && _register_wait == 0) {
+	if (_register_wait == 0) {
 
 		select_register_bank(REG_BANK(ICMREG_20948_ACCEL_XOUT_H));
 
@@ -737,21 +721,7 @@ ICM20948::measure()
 	 * In case of a mag passthrough read, hand the magnetometer data over to _mag. Else,
 	 * try to read a magnetometer report.
 	 */
-
-#   ifdef USE_I2C
-
-	if (_mag.is_passthrough()) {
-#   endif
-
-		_mag._measure(timestamp_sample, icm_report.mag);
-
-#   ifdef USE_I2C
-
-	} else {
-		_mag.measure();
-	}
-
-#   endif
+	_mag._measure(timestamp_sample, icm_report.mag);
 
 	// Continue evaluating gyro and accelerometer results
 	if (_register_wait == 0) {

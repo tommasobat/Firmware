@@ -41,7 +41,7 @@
 #include <lib/systemlib/conversions.h>
 #include <lib/systemlib/px4_macros.h>
 
-#include "ICM20948_mag.h"
+#include "ICM20948_mag.hpp"
 
 #if defined(PX4_I2C_OBDEV_ICM20948) || defined(PX4_I2C_BUS_EXPANSION)
 #  define USE_I2C

@@ -34,7 +34,7 @@
 #include <px4_platform_common/px4_config.h>
 #include <px4_platform_common/getopt.h>
 
-#include "icm20948.h"
+#include "ICM20948.hpp"
 
 enum class ICM20948_BUS {
 	ALL = 0,

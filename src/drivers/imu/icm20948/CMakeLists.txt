@@ -34,12 +34,12 @@ px4_add_module(
 	MODULE drivers__imu__icm20948
 	MAIN icm20948
 	SRCS
-		icm20948.cpp
-		icm20948_i2c.cpp
-		icm20948_spi.cpp
-		icm20948_main.cpp
+		ICM20948.cpp
+		ICM20948.hpp
+		ICM20948_SPI.cpp
 		ICM20948_mag.cpp
-		AK09916_I2C.cpp
+		ICM20948_mag.hpp
+		icm20948_main.cpp
 	DEPENDS
 		px4_work_queue
 		drivers_accelerometer

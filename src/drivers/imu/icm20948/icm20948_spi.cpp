@@ -32,17 +32,15 @@
  ****************************************************************************/
 
 /**
- * @file icm20948_spi.cpp
+ * @file ICM20948_SPI.cpp
  *
  * Driver for the Invensense ICM20948 connected via SPI.
  *
- * @author Andrew Tridgell
- * @author Pat Hickey
- * @author David sidrane
  */
 
 #include <drivers/device/spi.h>
-#include "icm20948.h"
+
+#include "ICM20948.hpp"
 
 #define DIR_READ			0x80
 #define DIR_WRITE			0x00

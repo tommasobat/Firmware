@@ -1,6 +1,6 @@
 /****************************************************************************
  *
- *   Copyright (c) 2012-2016 PX4 Development Team. All rights reserved.
+ *   Copyright (c) 2019 PX4 Development Team. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -115,9 +115,6 @@ public:
 	~ICM20948_mag();
 
 	void set_passthrough(uint8_t reg, uint8_t size, uint8_t *out = NULL);
-	void passthrough_read(uint8_t reg, uint8_t *buf, uint8_t size);
-	void passthrough_write(uint8_t reg, uint8_t val);
-	void read_block(uint8_t reg, uint8_t *val, uint8_t count);
 
 	int ak09916_reset();
 	int ak09916_setup();
@@ -132,13 +129,10 @@ protected:
 
 	friend class ICM20948;
 
-	void measure();
 	void _measure(hrt_abstime timestamp_sample, ak09916_regs data);
 
 	uint8_t read_reg(unsigned reg);
 	void write_reg(unsigned reg, uint8_t value);
-
-	bool is_passthrough() { return _interface == nullptr; }
 
 private:
 	PX4Magnetometer		_px4_mag;

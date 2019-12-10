@@ -1,6 +1,6 @@
 /****************************************************************************
  *
- *   Copyright (c) 2012-2016 PX4 Development Team. All rights reserved.
+ *   Copyright (c) 2019 PX4 Development Team. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -46,15 +46,13 @@
 #include <lib/perf/perf_counter.h>
 #include <drivers/drv_hrt.h>
 
-#include "ICM20948_mag.h"
-#include "icm20948.h"
+#include "ICM20948_mag.hpp"
+#include "ICM20948.hpp"
 
 // If interface is non-null, then it will used for interacting with the device.
 // Otherwise, it will passthrough the parent ICM20948
-ICM20948_mag::ICM20948_mag(ICM20948 *parent, device::Device *interface, enum Rotation rotation) :
-	_interface(interface),
-	_px4_mag(parent->_interface->get_device_id(), (parent->_interface->external() ? ORB_PRIO_MAX : ORB_PRIO_HIGH),
-		 rotation),
+ICM20948_mag::ICM20948_mag(ICM20948 *parent, enum Rotation rotation) :
+	_px4_mag(parent->_interface->get_device_id(), (parent->_interface->external() ? ORB_PRIO_MAX : ORB_PRIO_HIGH), rotation),
 	_parent(parent),
 	_mag_overruns(perf_alloc(PC_COUNT, MODULE_NAME": mag_overruns")),
 	_mag_overflows(perf_alloc(PC_COUNT, MODULE_NAME": mag_overflows")),
@@ -69,49 +67,6 @@ ICM20948_mag::~ICM20948_mag()
 	perf_free(_mag_overruns);
 	perf_free(_mag_overflows);
 	perf_free(_mag_errors);
-}
-
-void
-ICM20948_mag::measure()
-{
-	const hrt_abstime timestamp_sample = hrt_absolute_time();
-
-	uint8_t st1 = 0;
-	int ret = _interface->read(AK09916REG_ST1, &st1, sizeof(st1));
-
-	if (ret != OK) {
-		_px4_mag.set_error_count(perf_event_count(_mag_errors));
-		return;
-	}
-
-	/* Check if data ready is set.
-	 * This is not described to be set in continuous mode according to the
-	 * ICM20948 datasheet. However, the datasheet of the AK09916 recommends to
-	 * check data ready before doing the read and before triggering the
-	 * next measurement by reading ST2. */
-	if (!(st1 & AK09916_ST1_DRDY)) {
-		return;
-	}
-
-	/* Monitor if data overrun flag is ever set. */
-	if (st1 & 0x02) {
-		perf_count(_mag_overruns);
-	}
-
-	ak09916_regs data{};
-	ret = _interface->read(AK09916REG_ST1, &data, sizeof(data));
-
-	if (ret != OK) {
-		_px4_mag.set_error_count(perf_event_count(_mag_errors));
-		return;
-	}
-
-	/* Monitor magnetic sensor overflow flag. */
-	if (data.st2 & 0x08) {
-		perf_count(_mag_overflows);
-	}
-
-	_measure(timestamp_sample, data);
 }
 
 void
@@ -161,32 +116,17 @@ ICM20948_mag::set_passthrough(uint8_t reg, uint8_t size, uint8_t *out)
 	_parent->write_reg(ICMREG_20948_I2C_SLV0_CTRL, size | BIT_I2C_SLV0_EN);
 }
 
-void
-ICM20948_mag::read_block(uint8_t reg, uint8_t *val, uint8_t count)
-{
-	_parent->_interface->read(reg, val, count);
-}
-
-void
-ICM20948_mag::passthrough_read(uint8_t reg, uint8_t *buf, uint8_t size)
-{
-	set_passthrough(reg, size);
-	px4_usleep(25 + 25 * size); // wait for the value to be read from slave
-	read_block(ICMREG_20948_EXT_SLV_SENS_DATA_00, buf, size);
-	_parent->write_reg(ICMREG_20948_I2C_SLV0_CTRL, 0); // disable new reads
-}
-
 uint8_t
 ICM20948_mag::read_reg(unsigned int reg)
 {
 	uint8_t buf{};
 
-	if (_interface == nullptr) {
-		passthrough_read(reg, &buf, 0x01);
+	set_passthrough(reg, 1);
+	px4_usleep(25 + 25 * 1); // wait for the value to be read from slave
 
-	} else {
-		_interface->read(reg, &buf, 1);
-	}
+	_parent->_interface->read(ICMREG_20948_EXT_SLV_SENS_DATA_00, buf, 1);
+
+	_parent->write_reg(ICMREG_20948_I2C_SLV0_CTRL, 0); // disable new reads
 
 	return buf;
 }
@@ -199,27 +139,13 @@ ICM20948_mag::ak09916_check_id(uint8_t &deviceid)
 	return (AK09916_DEVICE_ID == deviceid);
 }
 
-/*
- * 400kHz I2C bus speed = 2.5us per bit = 25us per byte
- */
-void
-ICM20948_mag::passthrough_write(uint8_t reg, uint8_t val)
-{
-	set_passthrough(reg, 1, &val);
-	px4_usleep(50); // wait for the value to be written to slave
-	_parent->write_reg(ICMREG_20948_I2C_SLV0_CTRL, 0); // disable new writes
-}
-
 void
 ICM20948_mag::write_reg(unsigned reg, uint8_t value)
 {
 	// general register transfer at low clock speed
-	if (_interface == nullptr) {
-		passthrough_write(reg, value);
-
-	} else {
-		_interface->write(reg, &value, 1);
-	}
+	set_passthrough(reg, 1, &value);
+	px4_usleep(50); // wait for the value to be written to slave
+	_parent->write_reg(ICMREG_20948_I2C_SLV0_CTRL, 0); // disable new writes
 }
 
 int
@@ -248,12 +174,7 @@ ICM20948_mag::ak09916_read_adjustments()
 	write_reg(AK09916REG_CNTL1, AK09916_FUZE_MODE | AK09916_16BIT_ADC);
 	px4_usleep(50);
 
-	if (_interface != nullptr) {
-		_interface->read(AK09916REG_ASAX, response, 3);
-
-	} else {
-		passthrough_read(AK09916REG_ASAX, response, 3);
-	}
+	_interface->read(AK09916REG_ASAX, response, 3);
 
 	write_reg(AK09916REG_CNTL1, AK09916_POWERDOWN_MODE);
 
@@ -274,25 +195,16 @@ ICM20948_mag::ak09916_read_adjustments()
 int
 ICM20948_mag::ak09916_setup_master_i2c()
 {
-	/* When _interface is null we are using SPI and must
-	 * use the parent interface to configure the device to act
-	 * in master mode (SPI to I2C bridge)
-	 */
-	if (_interface == nullptr) {
-		// ICM20948 -> AK09916
-		_parent->modify_checked_reg(ICMREG_20948_USER_CTRL, 0, BIT_I2C_MST_EN);
+	// ICM20948 -> AK09916
+	_parent->modify_checked_reg(ICMREG_20948_USER_CTRL, 0, BIT_I2C_MST_EN);
 
-		// WAIT_FOR_ES does not exist for ICM20948. Not sure how to replace this (or if that is needed)
-		_parent->write_reg(ICMREG_20948_I2C_MST_CTRL, BIT_I2C_MST_P_NSR | ICM_BITS_I2C_MST_CLOCK_400HZ);
-
-	} else {
-		_parent->modify_checked_reg(ICMREG_20948_USER_CTRL, BIT_I2C_MST_EN, 0);
-	}
+	// WAIT_FOR_ES does not exist for ICM20948. Not sure how to replace this (or if that is needed)
+	_parent->write_reg(ICMREG_20948_I2C_MST_CTRL, BIT_I2C_MST_P_NSR | ICM_BITS_I2C_MST_CLOCK_400HZ);
 
 	return OK;
 }
 int
-ICM20948_mag::ak09916_setup(void)
+ICM20948_mag::ak09916_setup()
 {
 	int retries = 20;
 
@@ -322,10 +234,9 @@ ICM20948_mag::ak09916_setup(void)
 
 	write_reg(AK09916REG_CNTL2, AK09916_CNTL2_CONTINOUS_MODE_100HZ);
 
-	if (_interface == nullptr) {
-		// Configure mpu' I2c Master interface to read ak09916 data into to fifo
-		set_passthrough(AK09916REG_ST1, sizeof(ak09916_regs));
-	}
+
+	// Configure mpu' I2c Master interface to read ak09916 data into to fifo
+	set_passthrough(AK09916REG_ST1, sizeof(ak09916_regs));
 
 	return OK;
 }
