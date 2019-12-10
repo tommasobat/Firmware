@@ -32,7 +32,7 @@
  ****************************************************************************/
 
 /**
- * @file InvenSense_ICM20602_registers.hpp
+ * @file InvenSense_ICM20948_registers.hpp
  *
  * Invensense ICM-20602 registers.
  *
@@ -70,15 +70,6 @@ enum class BANK_0 : uint8_t {
 	I2C_MST_STATUS       = 0x17,
 
 	EXT_SLV_SENS_DATA_00 = 0x3B,
-	EXT_SLV_SENS_DATA_01 = 0x3C,
-	EXT_SLV_SENS_DATA_02 = 0x3D,
-	EXT_SLV_SENS_DATA_03 = 0x3E,
-	EXT_SLV_SENS_DATA_04 = 0x3F,
-	EXT_SLV_SENS_DATA_05 = 0x40,
-	EXT_SLV_SENS_DATA_06 = 0x41,
-	EXT_SLV_SENS_DATA_07 = 0x42,
-	EXT_SLV_SENS_DATA_08 = 0x43,
-
 
 	FIFO_EN_1            = 0x66,
 	FIFO_EN_2            = 0x67,
@@ -110,15 +101,23 @@ enum class BANK_3 : uint8_t {
 	I2C_MST_CTRL         = 0x01,
 
 	I2C_SLV0_ADDR        = 0x03,
-        I2C_SLV0_REG         = 0x04,
+	I2C_SLV0_REG         = 0x04,
 	I2C_SLV0_CTRL        = 0x05,
 	I2C_SLV0_DO          = 0x06,
 	I2C_SLV1_ADDR        = 0x07,
 
 	REG_BANK_SEL         = 0x7F,
 };
+};
 
 
+// PWR_MGMT_1
+enum PWR_MGMT_1_BIT : uint8_t {
+	DEVICE_RESET = Bit7,
+
+	CLKSEL_2     = Bit2,
+	CLKSEL_1     = Bit1,
+	CLKSEL_0     = Bit0,
 };
 
 
@@ -131,31 +130,32 @@ enum CONFIG_BIT : uint8_t {
 	DLPF_CFG_BYPASS_DLPF_8KHZ = 7, // Rate 8 kHz [2:0]
 };
 
-// GYRO_CONFIG
-enum GYRO_CONFIG_BIT : uint8_t {
-	// FS_SEL [4:3]
-	FS_SEL_250_DPS	= 0,           // 0b00000
-	FS_SEL_500_DPS	= Bit3,        // 0b01000
-	FS_SEL_1000_DPS	= Bit4,        // 0b10000
-	FS_SEL_2000_DPS	= Bit4 | Bit3, // 0b11000
+// GYRO_CONFIG_1
+enum GYRO_CONFIG_1_BIT : uint8_t {
+	// GYRO_FS_SEL[1:0]
+	FS_SEL_250_DPS	= 0,           // 0b00
+	FS_SEL_500_DPS	= Bit1,        // 0b01
+	FS_SEL_1000_DPS	= Bit2,        // 0b10
+	FS_SEL_2000_DPS	= Bit2 | Bit1, // 0b11
 
-	// FCHOICE_B [1:0]
-	FCHOICE_B_8KHZ_BYPASS_DLPF = Bit1 | Bit0, // 0b10 - 3-dB BW: 3281 Noise BW (Hz): 3451.0   8 kHz
+	GYRO_FCHOICE_BYPASS_DLPF = 0, // 0 – Bypass gyro DLPF
 };
 
 // ACCEL_CONFIG
 enum ACCEL_CONFIG_BIT : uint8_t {
-	// ACCEL_FS_SEL [4:3]
-	ACCEL_FS_SEL_2G  = 0,           // 0b00000
-	ACCEL_FS_SEL_4G  = Bit3,        // 0b01000
-	ACCEL_FS_SEL_8G  = Bit4,        // 0b10000
-	ACCEL_FS_SEL_16G = Bit4 | Bit3, // 0b11000
+	// ACCEL_FS_SEL[1:0]
+	ACCEL_FS_SEL_2G  = 0,           // 0b00
+	ACCEL_FS_SEL_4G  = Bit1,        // 0b01
+	ACCEL_FS_SEL_8G  = Bit2,        // 0b10
+	ACCEL_FS_SEL_16G = Bit2 | Bit1, // 0b11
+
+	ACCEL_FCHOICE_BYPASS_DLPF = 0,  // 0: Bypass accel DLPF
 };
 
-// ACCEL_CONFIG2
-enum ACCEL_CONFIG2_BIT : uint8_t {
-	ACCEL_FCHOICE_B_BYPASS_DLPF = Bit3,
-};
+
+
+
+
 
 // FIFO_EN
 enum FIFO_EN_BIT : uint8_t {
@@ -179,14 +179,6 @@ enum INT_STATUS_BIT : uint8_t {
 enum USER_CTRL_BIT : uint8_t {
 	FIFO_EN  = Bit6,
 	FIFO_RST = Bit2,
-};
-
-// PWR_MGMT_1
-enum PWR_MGMT_1_BIT : uint8_t {
-	DEVICE_RESET = Bit7,
-	CLKSEL_2     = Bit2,
-	CLKSEL_1     = Bit1,
-	CLKSEL_0     = Bit0,
 };
 
 
@@ -214,4 +206,4 @@ struct DATA {
 static_assert(sizeof(DATA) == 14);
 }
 
-} // namespace InvenSense_ICM20602
+} // namespace InvenSense_ICM20948

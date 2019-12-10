@@ -81,82 +81,11 @@ enum ST1_BIT : uint8_t {
 
 // CNTL2
 enum CNTL2_BIT : uint8_t {
-
 	MODE1 = Bit1,        // Continuous measurement mode 1 (10Hz)
 	MODE2 = Bit2,        // Continuous measurement mode 2 (20Hz)
 	MODE3 = Bit2 | Bit1, // Continuous measurement mode 3 (50Hz)
 	MODE4 = Bit3,        // Continuous measurement mode 4 (100Hz)
 };
 
-// ACCEL_CONFIG
-enum ACCEL_CONFIG_BIT : uint8_t {
-	// ACCEL_FS_SEL [4:3]
-	ACCEL_FS_SEL_2G  = 0,           // 0b00000
-	ACCEL_FS_SEL_4G  = Bit3,        // 0b01000
-	ACCEL_FS_SEL_8G  = Bit4,        // 0b10000
-	ACCEL_FS_SEL_16G = Bit4 | Bit3, // 0b11000
-};
 
-// ACCEL_CONFIG2
-enum ACCEL_CONFIG2_BIT : uint8_t {
-	ACCEL_FCHOICE_B_BYPASS_DLPF = Bit3,
-};
-
-// FIFO_EN
-enum FIFO_EN_BIT : uint8_t {
-	GYRO_FIFO_EN  = Bit4,
-	ACCEL_FIFO_EN = Bit3,
-};
-
-// INT_ENABLE
-enum INT_ENABLE_BIT : uint8_t {
-	FIFO_OFLOW_EN   = Bit4,
-	DATA_RDY_INT_EN = Bit0
-};
-
-// INT_STATUS
-enum INT_STATUS_BIT : uint8_t {
-	FIFO_OFLOW_INT = Bit4,
-	DATA_RDY_INT   = Bit0,
-};
-
-// USER_CTRL
-enum USER_CTRL_BIT : uint8_t {
-	FIFO_EN  = Bit6,
-	FIFO_RST = Bit2,
-};
-
-// PWR_MGMT_1
-enum PWR_MGMT_1_BIT : uint8_t {
-	DEVICE_RESET = Bit7,
-	CLKSEL_2     = Bit2,
-	CLKSEL_1     = Bit1,
-	CLKSEL_0     = Bit0,
-};
-
-
-namespace FIFO
-{
-static constexpr size_t SIZE = 1008;
-
-// FIFO_DATA layout when FIFO_EN has both GYRO_FIFO_EN and ACCEL_FIFO_EN set
-struct DATA {
-	uint8_t ACCEL_XOUT_H;
-	uint8_t ACCEL_XOUT_L;
-	uint8_t ACCEL_YOUT_H;
-	uint8_t ACCEL_YOUT_L;
-	uint8_t ACCEL_ZOUT_H;
-	uint8_t ACCEL_ZOUT_L;
-	uint8_t TEMP_OUT_H;
-	uint8_t TEMP_OUT_L;
-	uint8_t GYRO_XOUT_H;
-	uint8_t GYRO_XOUT_L;
-	uint8_t GYRO_YOUT_H;
-	uint8_t GYRO_YOUT_L;
-	uint8_t GYRO_ZOUT_H;
-	uint8_t GYRO_ZOUT_L;
-};
-static_assert(sizeof(DATA) == 14);
-}
-
-} // namespace InvenSense_ICM20602
+} // namespace AKM_AK09916

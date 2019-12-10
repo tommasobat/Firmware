@@ -36,9 +36,6 @@ px4_add_module(
 	SRCS
 		ICM20948.cpp
 		ICM20948.hpp
-		ICM20948_SPI.cpp
-		ICM20948_mag.cpp
-		ICM20948_mag.hpp
 		icm20948_main.cpp
 	DEPENDS
 		px4_work_queue
