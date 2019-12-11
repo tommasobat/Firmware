@@ -1,0 +1,69 @@
+#!/bin/sh
+#
+# @name Tarot T15 
+#
+# @type Octorotor x
+# @class Copter
+#
+# @output MAIN1 motor 1
+# @output MAIN2 motor 2
+# @output MAIN3 motor 3
+# @output MAIN4 motor 4
+# @output MAIN5 motor 5
+# @output MAIN6 motor 6
+# @output MAIN7 motor 7
+# @output MAIN8 motor 8
+
+sh /etc/init.d/rc.mc_defaults
+
+if [ $AUTOCNF = yes ]
+then
+
+param set	MC_ROLL_P	6.5
+param set	MC_PITCH_P	6.5
+param set	MC_YAW_P	2.799999952
+
+param set	MC_ROLLRATE_D	0.003
+param set	MC_ROLLRATE_I	0.050000001
+param set	MC_ROLLRATE_MAX	100
+param set	MC_ROLLRATE_P	0.150000006
+param set	MC_RR_INT_LIM	0.300000012
+
+param set	MC_PITCHRATE_D	0.003
+param set	MC_PITCHRATE_I	0.050000001
+param set	MC_PITCHRATE_MAX	100
+param set	MC_PITCHRATE_P	0.150000006
+param set	MC_PR_INT_LIM	0.300000012
+
+param set	MC_YAWRATE_D	0
+param set	MC_YAWRATE_I	0.100000001
+param set	MC_YAWRATE_MAX	50
+param set	MC_YAWRATE_P	0.200000003
+
+param set       MPC_MAN_TILT_MAX 20
+
+param set	MPC_XY_CRUISE	5
+param set	MPC_XY_MAN_EXPO	0
+param set	MPC_XY_P	0.949999988
+param set	MPC_XY_VEL_D	0.01
+param set	MPC_XY_VEL_I	0.02
+param set	MPC_XY_VEL_MAX	12
+param set	MPC_XY_VEL_P	0.090000004
+param set	MPC_Z_MAN_EXPO	0
+param set	MPC_Z_P	1
+param set	MPC_Z_VEL_D	0
+param set	MPC_Z_VEL_I	0.02
+param set	MPC_Z_VEL_MAX_DN	1
+param set	MPC_Z_VEL_MAX_UP	3
+param set	MPC_Z_VEL_P	0.200000003
+
+param set	MIS_TAKEOFF_ALT	3
+param set       NAV_DLL_ACT	0
+param set       NAV_RCL_ACT	0
+
+fi
+
+set MAV_TYPE 14
+
+set MIXER octo_x
+
